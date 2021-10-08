@@ -1,0 +1,1 @@
+A shell interface client for Kafka
