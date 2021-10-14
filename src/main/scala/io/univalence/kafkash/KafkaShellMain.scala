@@ -24,7 +24,8 @@ object KafkaShellMain {
       admin: AdminClient,
       consumer: KafkaConsumer[String, String],
       producer: KafkaProducer[String, String],
-      topics: => Seq[String]
+      topics: => Seq[String],
+      groups: => Seq[String]
   ): Seq[KafkaCliCommand] =
     Seq(
       new TopicListCommand(admin),
@@ -34,7 +35,8 @@ object KafkaShellMain {
       new WriteToTopicCommand(producer, topics),
       new NewCommand(admin),
       new DeleteCommand(admin, topics),
-      new ClusterCommand(admin)
+      new ClusterCommand(admin),
+      new DescribeGroupCommand(admin, consumer, groups)
     )
 
   def main(args: Array[String]): Unit = {
@@ -100,7 +102,7 @@ object KafkaShellMain {
       var done = false
       while (!done) {
         try {
-          val commands  = commandsFrom(admin, consumer, producer, topics)
+          val commands  = commandsFrom(admin, consumer, producer, topics, groups)
           val completer = treeCompleterFrom(commands)
           val reader =
             LineReaderBuilder
