@@ -28,7 +28,7 @@ class NewCommand(admin: AdminClient) extends KafkaCliCommand {
       else defaultPartitions
 
     val replicaCount =
-      if (args.length >= 7 && args(5) == "partitions:") args(6).toShort
+      if (args.length >= 7 && args(5) == "replicas:") args(6).toShort
       else defaultReplicas
 
     createTopic(topic, partitionCount, replicaCount)

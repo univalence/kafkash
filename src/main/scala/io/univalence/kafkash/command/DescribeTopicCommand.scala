@@ -39,7 +39,7 @@ class DescribeTopicCommand(admin: AdminClient, topics: => Seq[String])
 
       Printer.print(
         s"\tpartition: ${topic.name()}-${info
-          .partition()}: leader: ${info.leader().idString()} replicas: $replicas replicas: $isr"
+          .partition()}: leader: ${info.leader().idString()} replicas: $replicas isr: $isr"
       )
     }
   }

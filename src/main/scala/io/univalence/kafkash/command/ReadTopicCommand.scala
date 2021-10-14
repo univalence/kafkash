@@ -23,6 +23,7 @@ class ReadTopicCommand(
       name,
       node(new StringsCompleter(topics.asJava), node("last")),
       node(new StringsCompleter(topics.asJava), node("follow")),
+//      node(new StringsCompleter(topics.asJava), node("partition:")),
       node(new StringsCompleter(topics.asJava))
     )
 
@@ -36,6 +37,7 @@ class ReadTopicCommand(
     args.lift(2) match {
       case Some("last") => readFrom(topic, consumer, args(3).toInt)
       case Some("follow") => followTopic(topic, consumer)
+//      case Some("partition:") =>
       case None => readFrom(topic, consumer, 1)
       case Some(_) => Printer.print(Console.RED, s"unknown command: $commandLine")
     }
@@ -133,7 +135,7 @@ class ReadTopicCommand(
   def printRecord(record: ConsumerRecord[String, String]): Unit = {
     Printer.print(
       Console.MAGENTA,
-      s"${record.topic()}-${record.partition()}@${record
+      s"${Console.UNDERLINED}${record.topic()}-${record.partition()}${Console.RESET}${Console.MAGENTA}@${record
         .offset()}:${toLocalDateTime(record.timestamp())}"
     )
 
@@ -150,7 +152,7 @@ class ReadTopicCommand(
 
     Printer.print(Console.YELLOW, s"\tKey: ${record.key()}")
     Printer.print(Console.BLUE, s"\tValue:")
-    Printer.print(record.value())
+    Printer.print(Console.BLUE, record.value())
   }
 
 }
