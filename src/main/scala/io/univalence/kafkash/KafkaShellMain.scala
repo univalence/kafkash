@@ -33,24 +33,40 @@ object KafkaShellMain {
       new ReadTopicCommand(consumer, topics),
       new WriteToTopicCommand(producer, topics),
       new NewCommand(admin),
-      new DeleteCommand(admin, topics)
+      new DeleteCommand(admin, topics),
+      new ClusterCommand(admin)
     )
 
   def main(args: Array[String]): Unit = {
-    val uuid = UUID.randomUUID()
+    val (parameters, values) = getParameters(args)
 
+    if (parameters.contains("help")) {
+      help()
+      sys.exit(0)
+    }
+
+    val bootstrapServers =
+      parameters
+        .find(_._1 == "bootstrap.servers")
+        .map(_._2.mkString(","))
+        .getOrElse(defaultKafkaServers)
+
+    val uuid = UUID.randomUUID()
+    Printer.print(Console.YELLOW, s"connecting to $bootstrapServers...")
     val admin =
       AdminClient.create(
         Map[String, AnyRef](
-          AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG -> defaultKafkaServers,
+          AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG -> bootstrapServers,
           AdminClientConfig.CLIENT_ID_CONFIG         -> s"admin-cli-client-$uuid"
         ).asJava
       )
+    val cluster = new ClusterCommand(admin)
+    cluster.run(cluster.name)
 
     val producer =
       new KafkaProducer[String, String](
         Map[String, AnyRef](
-          ProducerConfig.BOOTSTRAP_SERVERS_CONFIG -> defaultKafkaServers,
+          ProducerConfig.BOOTSTRAP_SERVERS_CONFIG -> bootstrapServers,
           ProducerConfig.CLIENT_ID_CONFIG         -> s"producer-cli-$uuid"
         ).asJava,
         Serdes.String().serializer(),
@@ -60,7 +76,7 @@ object KafkaShellMain {
     val consumer =
       new KafkaConsumer[String, String](
         Map[String, AnyRef](
-          ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG -> defaultKafkaServers,
+          ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG -> bootstrapServers,
           ConsumerConfig.CLIENT_ID_CONFIG         -> s"consumer-cli-$uuid",
           ConsumerConfig.GROUP_ID_CONFIG          -> s"consumer-grp-$uuid"
         ).asJava,
@@ -124,6 +140,70 @@ object KafkaShellMain {
       producer.close()
       terminal.close()
     }
+  }
+
+  def help(): Unit = {
+    Printer.print(
+      s"""kafkash: shell for Apache Kafka cluster
+usage kafkash [--bootstrap.servers <server_list>] [--help]
+    --bootstrap.servers <server_list>        The servers to connect to, in the
+                                             form HOST1:PORT1[,HOST2:PORT2]*.
+                                             Default: $defaultKafkaServers.
+    --help                                   Print this help.
+"""
+    )
+  }
+
+  def getParameters(
+      args: Array[String]
+  ): (Map[String, List[String]], List[String]) = {
+    val (_parameters, values, current) =
+      args.toList
+        .foldLeft(
+          (
+            List.empty[(String, String)],
+            List.empty[String],
+            Option.empty[String]
+          )
+        ) {
+          case ((parameters, values, None), value) =>
+            if (value.startsWith("--")) {
+              if (value.contains("=")) {
+                val kv = value.substring(2).split("=", 2)
+                (parameters :+ (kv(0) -> kv(1)), values, None)
+              } else {
+                (parameters, values, Some(value.substring(2)))
+              }
+            } else {
+              (parameters, values :+ value, None)
+            }
+          case ((parameters, values, Some(current)), value) =>
+            if (value.startsWith("--")) {
+              if (value.contains("=")) {
+                val kv = value.substring(2).split("=", 2)
+                (
+                  parameters :+ (current -> "") :+ (kv(0) -> kv(1)),
+                  values,
+                  None
+                )
+              } else {
+                (
+                  parameters :+ (current -> ""),
+                  values,
+                  Some(value.substring(2))
+                )
+              }
+            } else {
+              (parameters :+ (current -> value), values, None)
+            }
+        }
+
+    val parameters =
+      (_parameters ++ current.map(_ -> ""))
+        .groupBy(_._1)
+        .map { case (k, l) => k -> l.map(_._2).filterNot(_.isEmpty) }
+
+    (parameters, values)
   }
 
   def treeCompleterFrom(
