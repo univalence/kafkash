@@ -4,6 +4,8 @@ version := "0.1"
 
 scalaVersion := "2.13.6"
 
+assembly / mainClass := Some("io.univalence.kafkash.KafkaShellMain")
+
 libraryDependencies ++= Seq(
   "org.apache.kafka" % "kafka-clients"   % "2.8.0",
   "ch.qos.logback"   % "logback-core"    % "1.2.3",
