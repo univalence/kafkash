@@ -38,7 +38,7 @@ object KafkaShellMain {
     )
 
   def main(args: Array[String]): Unit = {
-    val (parameters, values) = getParameters(args)
+    val (parameters, _) = getParameters(args)
 
     if (parameters.contains("help")) {
       help()
