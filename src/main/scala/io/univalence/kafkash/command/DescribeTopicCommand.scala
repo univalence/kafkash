@@ -38,8 +38,8 @@ class DescribeTopicCommand(admin: AdminClient, topics: => Seq[String])
       val isr      = info.isr().asScala.map(_.idString()).mkString(",")
 
       Printer.print(
-        s"\tpartition: ${topic.name()}-${info
-          .partition()}: leader: ${info.leader().idString()} replicas: $replicas isr: $isr"
+        s"\t${Console.YELLOW}${topic.name()}-${info
+          .partition()}${Console.RESET} leader: ${info.leader().idString()} replicas: $replicas isr: $isr"
       )
     }
   }
