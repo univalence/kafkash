@@ -4,12 +4,10 @@ A shell interface client for Kafka
 
 ## Usage
 
-You need to have a running Kafka cluster. If this cluster is local,
-you can use the following lines.
+Download `kafkash` from [Release page](https://github.com/univalence/kafkash/releases).
 
 ```shell
-$ sbt assembly
-$ ./bin/kafkash.sh
+$ kafkash
 ```
 
 For an external cluster or a cluster on containers, add the option
@@ -19,6 +17,5 @@ at least one machine.
 ## Help
 
 ```shell
-$ ./bin/kafkash.sh --help
+$ kafkash --help
 ```
-
