@@ -1,19 +1,17 @@
 package io.univalence.kafkash
 
-import io.univalence.kafkash.command._
 import java.util.UUID
+
 import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig}
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig}
 import org.apache.kafka.common.serialization.Serdes
 import org.jline.builtins.Completers.TreeCompleter
 import org.jline.reader.impl.history.DefaultHistory
-import org.jline.reader.{
-  EndOfFileException,
-  LineReaderBuilder,
-  UserInterruptException
-}
+import org.jline.reader.{EndOfFileException, LineReaderBuilder, UserInterruptException}
 import org.jline.terminal.TerminalBuilder
+
+import io.univalence.kafkash.command._
 
 object KafkaShellMain {
   import scala.jdk.CollectionConverters._
@@ -112,10 +110,8 @@ object KafkaShellMain {
               .completer(completer)
               .build()
 
-          val commandLine =
-            reader.readLine(s"${Console.MAGENTA}>${Console.RESET} ").trim
-          val maybeCommand: Option[KafkaCliCommand] =
-            commands.find(_.recognize(commandLine))
+          val commandLine                           = reader.readLine(s"${Console.MAGENTA}>${Console.RESET} ").trim
+          val maybeCommand: Option[KafkaCliCommand] = commands.find(_.recognize(commandLine))
           maybeCommand
             .map { command =>
               command.run(commandLine)
@@ -210,8 +206,7 @@ usage kafkash [--bootstrap.servers <server_list>] [--help]
 
   def treeCompleterFrom(
       commands: Seq[KafkaCliCommand]
-  ): TreeCompleter =
-    new TreeCompleter(commands.map(_.completerNode).asJava)
+  ): TreeCompleter = new TreeCompleter(commands.map(_.completerNode).asJava)
 
   def getGroups(admin: AdminClient): List[String] =
     admin

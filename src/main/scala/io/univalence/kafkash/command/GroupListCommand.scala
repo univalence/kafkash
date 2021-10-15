@@ -6,11 +6,10 @@ import org.jline.builtins.Completers.TreeCompleter
 class GroupListCommand(admin: AdminClient) extends KafkaCliCommand {
   import scala.jdk.CollectionConverters._
 
-  override val name: String = "groups"
+  override val name: String                      = "groups"
   override val completerNode: TreeCompleter.Node = TreeCompleter.node(name)
 
-  override def recognize(commandLine: String): Boolean =
-    name == commandLine
+  override def recognize(commandLine: String): Boolean = name == commandLine
 
   override def run(commandLine: String): Unit = {
     val options =

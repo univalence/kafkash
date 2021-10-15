@@ -1,6 +1,6 @@
 package io.univalence.kafkash.command
 
-import org.apache.kafka.clients.admin.{AdminClient, ConsumerGroupDescription, DescribeConsumerGroupsOptions, DescribeTopicsOptions, ListConsumerGroupOffsetsOptions, TopicDescription}
+import org.apache.kafka.clients.admin._
 import org.apache.kafka.clients.consumer.{KafkaConsumer, OffsetAndMetadata}
 import org.apache.kafka.common.TopicPartition
 import org.jline.builtins.Completers.TreeCompleter
@@ -11,12 +11,10 @@ class DescribeGroupCommand(admin: AdminClient, consumer: KafkaConsumer[String, S
     extends KafkaCliCommand {
   import scala.jdk.CollectionConverters._
 
-  override val name: String = "group"
-  override val completerNode: TreeCompleter.Node =
-    node(name, node(new StringsCompleter(groups.asJava)))
+  override val name: String                      = "group"
+  override val completerNode: TreeCompleter.Node = node(name, node(new StringsCompleter(groups.asJava)))
 
-  override def recognize(commandLine: String): Boolean =
-    name == commandLine.split("\\s+", 2)(0)
+  override def recognize(commandLine: String): Boolean = name == commandLine.split("\\s+", 2)(0)
 
   override def run(commandLine: String): Unit = {
     val groupName = commandLine.split("\\s+", 2)(1)
@@ -31,10 +29,10 @@ class DescribeGroupCommand(admin: AdminClient, consumer: KafkaConsumer[String, S
         .get(groupName)
         .get()
 
-    val listOptions =
-      new ListConsumerGroupOffsetsOptions().timeoutMs((defaultTimeout.getSeconds * 1000).toInt)
+    val listOptions = new ListConsumerGroupOffsetsOptions().timeoutMs((defaultTimeout.getSeconds * 1000).toInt)
     val offsets: Map[TopicPartition, OffsetAndMetadata] =
-      admin.listConsumerGroupOffsets(group.groupId(), listOptions)
+      admin
+        .listConsumerGroupOffsets(group.groupId(), listOptions)
         .partitionsToOffsetAndMetadata()
         .get()
         .asScala
@@ -45,12 +43,17 @@ class DescribeGroupCommand(admin: AdminClient, consumer: KafkaConsumer[String, S
       s"Group: ${group.groupId()} state:${group.state().name()} coordinator:${group.coordinator().idString()} assignator:${group.partitionAssignor()}"
     )
 
-    group.members().asScala
+    group
+      .members()
+      .asScala
       .foreach { member =>
-        Printer.print(Console.GREEN, s"\tclientId:${member.clientId()}\n\tconsumerId:${member.consumerId()}\n\thost:${member.host()}")
-        val partitions = member.assignment().topicPartitions().asScala
+        Printer.print(
+          Console.GREEN,
+          s"\tclientId:${member.clientId()}\n\tconsumerId:${member.consumerId()}\n\thost:${member.host()}"
+        )
+        val partitions   = member.assignment().topicPartitions().asScala
         val beginOffsets = consumer.beginningOffsets(partitions.asJava).asScala.toMap
-        val endOffsets = consumer.endOffsets(partitions.asJava).asScala.toMap
+        val endOffsets   = consumer.endOffsets(partitions.asJava).asScala.toMap
 
         partitions
           .foreach { partition =>
@@ -61,7 +64,8 @@ class DescribeGroupCommand(admin: AdminClient, consumer: KafkaConsumer[String, S
                 .getOrElse("")
 
             Printer.print(
-              s"\t\t${Console.YELLOW}${partition.topic()}-${partition.partition()}:${Console.RESET} range:${beginOffsets(partition)} -> ${endOffsets(partition)}$offset"
+              s"\t\t${Console.YELLOW}${partition.topic()}-${partition
+                .partition()}:${Console.RESET} range:${beginOffsets(partition)} -> ${endOffsets(partition)}$offset"
             )
           }
       }

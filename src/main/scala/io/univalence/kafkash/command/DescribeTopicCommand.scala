@@ -5,16 +5,13 @@ import org.jline.builtins.Completers.TreeCompleter
 import org.jline.builtins.Completers.TreeCompleter.node
 import org.jline.reader.impl.completer.StringsCompleter
 
-class DescribeTopicCommand(admin: AdminClient, topics: => Seq[String])
-    extends KafkaCliCommand {
+class DescribeTopicCommand(admin: AdminClient, topics: => Seq[String]) extends KafkaCliCommand {
   import scala.jdk.CollectionConverters._
 
-  override val name: String = "topic"
-  override val completerNode: TreeCompleter.Node =
-    node(name, node(new StringsCompleter(topics.asJava)))
+  override val name: String                      = "topic"
+  override val completerNode: TreeCompleter.Node = node(name, node(new StringsCompleter(topics.asJava)))
 
-  override def recognize(commandLine: String): Boolean =
-    name == commandLine.split("\\s+", 2)(0)
+  override def recognize(commandLine: String): Boolean = name == commandLine.split("\\s+", 2)(0)
 
   override def run(commandLine: String): Unit = {
     val topicName = commandLine.split("\\s+", 2)(1)

@@ -6,12 +6,10 @@ import org.jline.builtins.Completers.TreeCompleter
 class TopicListCommand(admin: AdminClient) extends KafkaCliCommand {
   import scala.jdk.CollectionConverters._
 
-  override val name: String = "topics"
+  override val name: String                      = "topics"
   override val completerNode: TreeCompleter.Node = TreeCompleter.node(name)
 
-
-  override def recognize(commandLine: String): Boolean =
-    name == commandLine
+  override def recognize(commandLine: String): Boolean = name == commandLine
 
   override def run(commandLine: String): Unit = {
     val options =

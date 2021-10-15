@@ -11,12 +11,10 @@ class NewCommand(admin: AdminClient) extends KafkaCliCommand {
   val defaultPartitions: Int = 3
   val defaultReplicas: Short = 1
 
-  override val name: String = "new"
-  override val completerNode: TreeCompleter.Node =
-    node(name, node("topic"))
+  override val name: String                      = "new"
+  override val completerNode: TreeCompleter.Node = node(name, node("topic"))
 
-  override def recognize(commandLine: String): Boolean =
-    commandLine.split("\\s+", 2)(0) == name
+  override def recognize(commandLine: String): Boolean = commandLine.split("\\s+", 2)(0) == name
 
   override def run(commandLine: String): Unit = {
     val args  = commandLine.split("\\s+")

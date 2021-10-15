@@ -2,6 +2,7 @@ package io.univalence.kafkash.command
 
 import java.nio.charset.StandardCharsets
 import java.time.Duration
+
 import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
 import org.apache.kafka.common.TopicPartition
 import org.jline.builtins.Completers.TreeCompleter
@@ -10,7 +11,7 @@ import org.jline.reader.impl.completer.StringsCompleter
 
 class ReadTopicCommand(
     consumer: KafkaConsumer[String, String],
-    topics: => Seq[String]
+    topics:   => Seq[String]
 ) extends KafkaCliCommand {
 
   import scala.jdk.CollectionConverters._
@@ -27,18 +28,16 @@ class ReadTopicCommand(
       node(new StringsCompleter(topics.asJava))
     )
 
-  override def recognize(commandLine: String): Boolean =
-    commandLine.split("\\s+", 2)(0) == name
+  override def recognize(commandLine: String): Boolean = commandLine.split("\\s+", 2)(0) == name
 
   override def run(commandLine: String): Unit = {
     val args  = commandLine.split("\\s+")
     val topic = args(1)
 
     args.lift(2) match {
-      case Some("last") => readFrom(topic, consumer, args(3).toInt)
+      case Some("last")   => readFrom(topic, consumer, args(3).toInt)
       case Some("follow") => followTopic(topic, consumer)
-//      case Some("partition:") =>
-      case None => readFrom(topic, consumer, 1)
+      case None    => readFrom(topic, consumer, 1)
       case Some(_) => Printer.print(Console.RED, s"unknown command: $commandLine")
     }
   }
@@ -78,11 +77,10 @@ class ReadTopicCommand(
         Printer.print(Console.RED, "No data available.")
       } else {
         consumer.assign(partitions.asJava)
-        endOffsets.foreach {
-          case (partition, endOffset) =>
-            val offset = Math.max(endOffset - count, beginOffsets(partition))
+        endOffsets.foreach { case (partition, endOffset) =>
+          val offset = Math.max(endOffset - count, beginOffsets(partition))
 
-            consumer.seek(partition, offset)
+          consumer.seek(partition, offset)
         }
 
         var records = consumer.poll(java.time.Duration.ofSeconds(5))
@@ -128,9 +126,7 @@ class ReadTopicCommand(
       .partitionsFor(topic)
       .asScala
       .toList
-      .map(partitionInfo =>
-        new TopicPartition(partitionInfo.topic(), partitionInfo.partition())
-      )
+      .map(partitionInfo => new TopicPartition(partitionInfo.topic(), partitionInfo.partition()))
 
   def printRecord(record: ConsumerRecord[String, String]): Unit = {
     Printer.print(
@@ -143,12 +139,10 @@ class ReadTopicCommand(
       record
         .headers()
         .asScala
-        .map(h =>
-          s"${h.key()}: ${new String(h.value(), StandardCharsets.UTF_8)}"
-        )
+        .map(h => s"${h.key()}: ${new String(h.value(), StandardCharsets.UTF_8)}")
         .mkString(", ")
 
-    Printer.print(Console.GREEN, s"\tHeaders: ${headers}")
+    Printer.print(Console.GREEN, s"\tHeaders: $headers")
 
     Printer.print(Console.YELLOW, s"\tKey: ${record.key()}")
     Printer.print(Console.BLUE, s"\tValue:")

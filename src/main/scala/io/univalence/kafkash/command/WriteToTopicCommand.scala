@@ -1,28 +1,22 @@
 package io.univalence.kafkash.command
 
-import java.time.{Instant, LocalDateTime, ZoneId}
 import java.util.concurrent.TimeUnit
-import org.apache.kafka.clients.producer.{
-  KafkaProducer,
-  ProducerRecord,
-  RecordMetadata
-}
+
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.jline.builtins.Completers.TreeCompleter._
 import org.jline.reader.impl.completer.StringsCompleter
 
 class WriteToTopicCommand(
     producer: KafkaProducer[String, String],
-    topics: => Seq[String]
+    topics:   => Seq[String]
 ) extends KafkaCliCommand {
 
   import scala.jdk.CollectionConverters._
 
-  override val name: String = "into"
-  override val completerNode: Node =
-    node(name, node(new StringsCompleter(topics.asJava), node("send")))
+  override val name: String        = "into"
+  override val completerNode: Node = node(name, node(new StringsCompleter(topics.asJava), node("send")))
 
-  override def recognize(commandLine: String): Boolean =
-    commandLine.split("\\s+")(0) == name
+  override def recognize(commandLine: String): Boolean = commandLine.split("\\s+")(0) == name
 
   override def run(commandLine: String): Unit = {
     val args     = commandLine.split("\\s+", 4)
@@ -43,14 +37,14 @@ class WriteToTopicCommand(
       value: String,
       producer: KafkaProducer[String, String]
   ): Unit = {
-    val record = new ProducerRecord[String, String](
-      topic,
-      key.orElse(key).orNull,
-      value
-    )
+    val record =
+      new ProducerRecord[String, String](
+        topic,
+        key.orElse(key).orNull,
+        value
+      )
     try {
-      val result =
-        producer.send(record).get(defaultTimeout.getSeconds, TimeUnit.SECONDS)
+      val result    = producer.send(record).get(defaultTimeout.getSeconds, TimeUnit.SECONDS)
       val timestamp = toLocalDateTime(result.timestamp())
 
       Printer.print(
