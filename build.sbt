@@ -1,3 +1,5 @@
+import sbtassembly.AssemblyPlugin.defaultUniversalScript
+
 lazy val root =
   (project in file("."))
     .enablePlugins(BuildInfoPlugin)
@@ -21,7 +23,10 @@ lazy val root =
         "org.testcontainers"      % "kafka"                    % libVersion.testcontainers % Test,
         "dev.zio"                %% "zio-test"                 % libVersion.zio            % Test,
         "org.scalatest"          %% "scalatest"                % "3.2.11"                  % Test
-      )
+      ),
+      assemblyPrependShellScript := Some(defaultUniversalScript(shebang = false)),
+      assembly / assemblyJarName := s"${name.value}",
+      assembly / mainClass       := Some("io.univalence.kafkash.KafkaShApp")
     )
 
 lazy val libVersion =
