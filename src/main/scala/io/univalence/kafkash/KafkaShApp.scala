@@ -9,7 +9,7 @@ import org.jline.terminal.{Terminal, TerminalBuilder}
 
 import zio.*
 
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 import java.io.IOException
 import java.time.Instant
@@ -27,40 +27,79 @@ object KafkaShApp extends ZIOAppDefault {
   override def run = {
     val applicationName = s"${io.univalence.kafkash.BuildInfo.name}-v${io.univalence.kafkash.BuildInfo.version}"
 
-    val ConnectionLayer: TaskLayer[Connection] =
+    def connectionLayer(bootstrapServers: String): TaskLayer[Connection] =
       KafkaConnection.layer(
         Map(
-          AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG -> defaultBootstrapServers,
+          AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG -> bootstrapServers,
           AdminClientConfig.CLIENT_ID_CONFIG         -> s"$applicationName-adminclient-${Instant.now().toEpochMilli}"
         ),
         Map(
-          ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG        -> defaultBootstrapServers,
+          ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG        -> bootstrapServers,
           ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG -> "false",
           ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG   -> classOf[ByteArrayDeserializer].getCanonicalName,
           ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG -> classOf[ByteArrayDeserializer].getCanonicalName
         ),
         Map(
-          ProducerConfig.BOOTSTRAP_SERVERS_CONFIG      -> defaultBootstrapServers,
+          ProducerConfig.BOOTSTRAP_SERVERS_CONFIG      -> bootstrapServers,
           ProducerConfig.ACKS_CONFIG                   -> "all",
           ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG   -> classOf[ByteArraySerializer].getCanonicalName,
           ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG -> classOf[ByteArraySerializer].getCanonicalName
         )
       )
 
-    (
+    val program =
       for {
         _ <- Console(_.print(applicationName))
+        _ <- Interpreter(_.showCluster)
         _ <- Console(_.response("type HELP for available commands"))
-        _ <- repLoop
+        _ <- repLoop.orDie
       } yield ()
-    ).provide(
-      zio.Console.live,
-      terminalLayer(applicationName),
-      ConnectionLayer,
-      KafkaShConsole.layer,
-      KafkaInterpreter.layer
-    )
+
+    val ConsoleLayer = ZLayer.make[Console](zio.Console.live, terminalLayer(applicationName), KafkaShConsole.layer)
+
+    for {
+      args <- getArgs.flatMap(a => ZIO.fromTry(parseArgs(a)))
+      _ <-
+        if (args.contains("help"))
+          zio.Console.printLine(
+            s"""$applicationName
+               |Usage:
+               |  --bootstrap <string>    Connect to bootstrap servers (default: localhost:9092)
+               |  --help                  Display this help
+               |""".stripMargin
+          )
+        else
+          program.provide(
+            ConsoleLayer,
+            connectionLayer(args.get("bootstrap").flatten.getOrElse(defaultBootstrapServers)),
+            KafkaInterpreter.layer
+          )
+    } yield ()
   }
+
+  case class Arg(key: String, value: Option[String])
+
+  def parseArgs(args: Chunk[String]): Try[Map[String, Option[String]]] =
+    args
+      .foldLeft[Try[(List[Arg], Option[Arg])]](Success((List.empty[Arg], Option.empty[Arg]))) {
+        case (Success((l, oa)), arg) =>
+          if (arg.startsWith("--")) {
+            oa match {
+              case None    => Success((l, Some(Arg(arg.substring(2), None))))
+              case Some(a) => Success((a :: l, Some(Arg(arg.substring(2), None))))
+            }
+          } else {
+            oa match {
+              case None    => Failure(new IllegalArgumentException(s"bad argument: $arg"))
+              case Some(a) => Success((a.copy(value = Some(arg)) :: l, None))
+            }
+          }
+        case (Failure(e), arg) => Failure(e)
+      }
+      .map {
+        case (l, None)    => l.map(a => a.key -> a.value).toMap
+        case (l, Some(a)) => (a :: l).map(a => a.key -> a.value).toMap
+      }
 
   def repLoop: ZIO[Connection with Console with Interpreter, Throwable, Unit] =
     (
