@@ -168,6 +168,7 @@ case class InterpreterLive(connection: Connection, console: Console) extends Int
         newPositions = positions.map(p => Math.max(0L, p - last))
         _       <- consumer.seek(partitions, newPositions)
         records <- consumer.poll(Duration.fromMillis(1000))
+        _       <- consumer.unsubscribe()
       } yield records.asScala
 
     records.flatMap { rs =>
