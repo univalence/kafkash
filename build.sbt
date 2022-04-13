@@ -5,7 +5,6 @@ lazy val root =
     .enablePlugins(BuildInfoPlugin)
     .settings(
       name             := "kafkash",
-      version          := "0.1",
       scalaVersion     := "3.1.1",
       buildInfoKeys    := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoPackage := "io.univalence.kafkash",
