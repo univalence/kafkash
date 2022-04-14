@@ -1,4 +1,4 @@
-package io.univalence.kafkash
+package io.univalence.kafkash.wrapper
 
 import org.apache.kafka.clients.consumer.{ConsumerRecord, ConsumerRecords, KafkaConsumer}
 import org.apache.kafka.common.TopicPartition

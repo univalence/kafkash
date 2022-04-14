@@ -1,4 +1,4 @@
-package io.univalence.kafkash
+package io.univalence.kafkash.wrapper
 
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord, RecordMetadata}
 

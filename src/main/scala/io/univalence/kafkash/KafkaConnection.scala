@@ -4,6 +4,8 @@ import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 
+import io.univalence.kafkash.wrapper.{ZAdminClient, ZConsumer, ZProducer}
+
 import zio.*
 
 object KafkaConnection {
@@ -65,7 +67,7 @@ object KafkaConnection {
     val admin: RIO[Connection, ZAdminClient] = ZIO.serviceWithZIO[Connection](_.admin)
 
     val consumer: RIO[Connection, ZConsumer[Array[Byte], Array[Byte]]] = ZIO.serviceWithZIO[Connection](_.consumer)
-    
+
     val producer: RIO[Connection, ZProducer[Array[Byte], Array[Byte]]] = ZIO.serviceWithZIO[Connection](_.producer)
 
     def close: RIO[Connection, Unit] = ZIO.serviceWithZIO[Connection](_.close)

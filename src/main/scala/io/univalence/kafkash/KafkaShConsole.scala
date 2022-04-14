@@ -2,20 +2,25 @@ package io.univalence.kafkash
 
 import org.jline.terminal.Terminal
 
+import io.univalence.kafkash.wrapper.ZLineReader
+
 import zio.*
 
 object KafkaShConsole {
 
   object Color {
-    val prompt: String   = scala.Console.MAGENTA
-    val response: String = scala.Console.YELLOW
-    val error: String    = scala.Console.RED
-    val reset: String    = scala.Console.RESET
+    val prompt: String    = scala.Console.MAGENTA
+    val response: String  = scala.Console.YELLOW
+    val error: String     = scala.Console.RED
+    val important: String = scala.Console.MAGENTA
+    val reset: String     = scala.Console.RESET
   }
 
   /** Kafka Sh console interface. */
   trait Console {
     def error(message: => Any): Task[Unit]
+
+    def important(message: => Any): Task[Unit]
 
     def response(message: => Any): Task[Unit]
 
@@ -39,6 +44,8 @@ object KafkaShConsole {
     val lineReader = new ZLineReader(terminal)
 
     override def error(message: => Any): Task[Unit] = console.printLine(s"${Color.error}$message${Color.reset}")
+
+    override def important(message: => Any): Task[Unit] = console.printLine(s"${Color.important}$message${Color.reset}")
 
     override def response(message: => Any): Task[Unit] = console.printLine(s"${Color.response}$message${Color.reset}")
 

@@ -1,5 +1,7 @@
 package io.univalence.kafkash
 
+import org.jline.terminal.Terminal
+
 import zio.*
 
 object KafkaInterpreter {
@@ -29,12 +31,12 @@ object KafkaInterpreter {
     def selectFollow(fromTopic: String): Task[RunningState]
 
     def select(fromTopic: String, last: Long): Task[RunningState]
-    
+
     def insert(toTopic: String, key: String, value: String): Task[RunningState]
   }
 
   object Interpreter extends Accessible[Interpreter]
-  
+
   val layer: URLayer[Connection with Console, Interpreter] =
     ZLayer.fromFunction[Connection, Console, Interpreter](InterpreterLive.apply)
 

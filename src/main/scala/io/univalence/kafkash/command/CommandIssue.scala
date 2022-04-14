@@ -5,4 +5,3 @@ enum CommandIssue {
   case GenericError(throwable: Throwable)
   case Empty
 }
-

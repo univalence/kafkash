@@ -1,4 +1,4 @@
-package io.univalence.kafkash
+package io.univalence.kafkash.wrapper
 
 import org.apache.kafka.clients.admin.*
 import org.apache.kafka.clients.admin.ListOffsetsResult.ListOffsetsResultInfo
