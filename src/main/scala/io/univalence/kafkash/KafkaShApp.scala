@@ -168,6 +168,7 @@ object KafkaShApp extends ZIOAppDefault {
       case Command.CreateTopic(topic, partitions, replicats) =>
         Interpreter(_.createTopic(topic, partitions.getOrElse(defaultPartitionCount), None))
       case Command.Select(fromTopic, last)     => Interpreter(_.select(fromTopic, last))
+      case Command.SelectFollow(fromTopic)     => Interpreter(_.selectFollow(fromTopic))
       case Command.Insert(toTopic, key, value) => Interpreter(_.insert(toTopic, key, value))
     }
 

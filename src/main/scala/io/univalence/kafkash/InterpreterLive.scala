@@ -8,6 +8,7 @@ import io.univalence.kafkash.KafkaConnection.Connection
 import io.univalence.kafkash.KafkaInterpreter.Interpreter
 import io.univalence.kafkash.KafkaShApp.RunningState
 import io.univalence.kafkash.KafkaShConsole.Console
+import io.univalence.kafkash.utils.CtrlCSignalHandler
 
 import zio.*
 
@@ -153,44 +154,72 @@ case class InterpreterLive(connection: Connection, console: Console) extends Int
       ZIO.succeed
     )
 
+  private def partitionsOf(topic: String): Task[List[TopicPartition]] =
+    for {
+      admin <- connection.admin
+      partitions <-
+        admin
+          .describeTopic(topic)
+          .map(_.partitions().asScala.map(info => new TopicPartition(topic, info.partition())))
+    } yield partitions.toList
+
+  private def displayRecord(record: ConsumerRecord[Array[Byte], Array[Byte]]): Task[Unit] = {
+    val headers = record.headers().asScala
+    val headersSt =
+      if (headers.isEmpty)
+        "(empty)"
+      else
+        headers
+          .map(h => s"${h.key()}: ${toStringEscape(h.value())}")
+          .mkString("\n\t\t", "\n\t\t", "")
+    val key   = toStringEscape(record.key())
+    val value = toStringEscape(record.value())
+    console.response(
+      s"${record.topic()}@${record.partition()}#${record.offset()}-${record.timestamp()}\n"
+        + s"\tHeaders:$headersSt\n"
+        + s"\tKey: $key\n"
+        + s"\tValue:"
+    ) *> console.print(value)
+  }
+
+  override def selectFollow(fromTopic: String): Task[RunningState] = {
+    val recordsRead: Task[Unit] =
+      for {
+        consumer <- connection.consumer
+        records  <- consumer.poll(Duration.fromMillis(500))
+        _        <- ZIO.foreach(records.asScala)(displayRecord)
+      } yield ()
+
+    for {
+      partitions <- partitionsOf(fromTopic)
+      consumer   <- connection.consumer
+      _          <- consumer.assign(partitions)
+      _          <- consumer.seekToEnd(partitions)
+      _          <- console.important("Hit <Ctrl+C> to stop...")
+      _ <-
+        CtrlCSignalHandler.doUntilCtrlC { ctrlHit =>
+          recordsRead.schedule(Schedule.recurUntilZIO(_ => ctrlHit.isDone))
+        }
+      _ <- consumer.unsubscribe()
+      _ <- console.print("")
+    } yield RunningState.Continue
+  }
+
   override def select(fromTopic: String, last: Long): Task[RunningState] = {
     val records: Task[Iterable[ConsumerRecord[Array[Byte], Array[Byte]]]] =
       for {
-        admin <- connection.admin
-        partitions <-
-          admin
-            .describeTopic(fromTopic)
-            .map(_.partitions().asScala.map(info => new TopicPartition(fromTopic, info.partition())).toList)
-        consumer  <- connection.consumer
-        _         <- consumer.assign(partitions)
-        _         <- consumer.seekToEnd(partitions)
-        positions <- consumer.position(partitions)
+        partitions <- partitionsOf(fromTopic)
+        consumer   <- connection.consumer
+        _          <- consumer.assign(partitions)
+        _          <- consumer.seekToEnd(partitions)
+        positions  <- consumer.position(partitions)
         newPositions = positions.map(p => Math.max(0L, p - last))
         _       <- consumer.seek(partitions, newPositions)
         records <- consumer.poll(Duration.fromMillis(1000))
         _       <- consumer.unsubscribe()
       } yield records.asScala
 
-    records.flatMap { rs =>
-      ZIO.foreach(rs) { record =>
-        val headers = record.headers().asScala
-        val headersSt =
-          if (headers.isEmpty)
-            "(empty)"
-          else
-            headers
-              .map(h => s"${h.key()}: ${toStringEscape(h.value())}")
-              .mkString("\n\t\t", "\n\t\t", "")
-        val key   = toStringEscape(record.key())
-        val value = toStringEscape(record.value())
-        console.response(
-          s"${record.topic()}@${record.partition()}#${record.offset()}-${record.timestamp()}\n"
-            + s"\tHeaders:$headersSt\n"
-            + s"\tKey: $key\n"
-            + s"\tValue:"
-        ) *> console.print(value)
-      }
-    } *> RunningState.ContinueM
+    records.flatMap(rs => ZIO.foreach(rs)(displayRecord)) *> RunningState.ContinueM
   }
 
   override def insert(toTopic: String, key: String, value: String): Task[RunningState] =

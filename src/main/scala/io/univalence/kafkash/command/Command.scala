@@ -14,5 +14,6 @@ enum Command(commandType: CommandType) {
   case CreateTopic(name: String, partitions: Option[Int], replicas: Option[Int])
       extends Command(CommandType.CreateTopic)
   case Select(fromTopic: String, last: Long) extends Command(CommandType.Select)
+  case SelectFollow(fromTopic: String) extends Command(CommandType.Select)
   case Insert(toTopic: String, key: String, value: String) extends Command(CommandType.Insert)
 }

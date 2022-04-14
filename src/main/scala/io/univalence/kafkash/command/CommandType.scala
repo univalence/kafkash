@@ -68,11 +68,11 @@ enum CommandType(val commandName: String, val usage: String, val description: St
       description = "Delete a consumer group."
     )
   case Select
-    extends CommandType(
-      commandName = "SELECT",
-      usage       = "SELECT FROM <topic> LAST [<n>]",
-      description = "Read data from topic."
-    )
+      extends CommandType(
+        commandName = "SELECT",
+        usage       = "SELECT FROM <topic> (LAST [<n>] | FOLLOW)",
+        description = "Read data from topic. FOLLOW parameter follows new messages until you hit <Ctrl+C>."
+      )
   case Insert
     extends CommandType(
       commandName = "INSERT",

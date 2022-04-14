@@ -100,9 +100,12 @@ object CommandParser extends RegexParsers {
 
   def select: Parser[Command] =
     keyword("SELECT") ~> s ~> keyword("FROM") ~> s ~> commit(
-      parseName ~ (s ~> keyword("LAST") ~> (s ~> parseInt).?) ^^ { case topic ~ delta =>
+      (parseName ~ (s ~> keyword("LAST") ~> (s ~> parseInt).?)) ^^ { case topic: String ~ delta: Option[Int] =>
         Command.Select(topic, delta.getOrElse(1).toLong)
       }
+        | (parseName ~ (s ~> keyword("FOLLOW"))) ^^ { case topic: String ~ _ =>
+          Command.SelectFollow(topic)
+        }
     )
 
   def insert: Parser[Command] =
