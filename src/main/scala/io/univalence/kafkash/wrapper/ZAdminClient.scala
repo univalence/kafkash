@@ -30,7 +30,6 @@ class ZAdminClient(admin: AdminClient) extends ZWrapped(admin) {
 
   def createGroup(group: String, topic: String): Task[Unit] =
     executeM { admin =>
-
       val partitions: Task[Iterable[TopicPartition]] =
         ZIO
           .fromFutureJava(admin.describeTopics(List(topic).asJava).all())

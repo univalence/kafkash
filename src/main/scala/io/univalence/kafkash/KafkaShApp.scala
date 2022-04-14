@@ -195,7 +195,7 @@ object KafkaShApp extends ZIOAppDefault {
         .map(_.map(_.padTo(20, ' ')).mkString(" "))
         .mkString("\t", "\n\t", "")
 
-    Console(_.response(s"Available commands:\n$commandsStr"))
+    Console(_.response(s"Available commands:\n$commandsStr\nType HELP <command> for more information."))
   }
 
   def displayCommandHelp(commandType: CommandType): ZIO[Console, Throwable, Unit] =
