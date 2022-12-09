@@ -73,7 +73,7 @@ class ZAdminClient(admin: AdminClient) extends ZWrapped(admin) {
     executeM { admin =>
       ZIO
         .fromFutureJava(admin.describeTopics(List(topic).asJava).all())
-        .map(descriptionMap => Task.succeed(descriptionMap.asScala.toMap.apply(topic)))
+        .map(descriptionMap => descriptionMap.asScala.toMap.apply(topic))
         .tapError(
           {
             // FIXME transmit cause in ZIO failure
