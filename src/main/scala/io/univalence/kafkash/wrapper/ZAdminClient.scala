@@ -73,15 +73,15 @@ class ZAdminClient(admin: AdminClient) extends ZWrapped(admin) {
     executeM { admin =>
       ZIO
         .fromFutureJava(admin.describeTopics(List(topic).asJava).all())
-        .foldZIO(
+        .map(descriptionMap => Task.succeed(descriptionMap.asScala.toMap.apply(topic)))
+        .tapError(
           {
+            // FIXME transmit cause in ZIO failure
             case e: org.apache.kafka.common.errors.UnknownTopicOrPartitionException =>
-              Task.fail(new NoSuchElementException(topic, e))
+              Task.fail(new NoSuchElementException(topic))
             case e =>
-              println(e)
               Task.fail(e)
-          },
-          descriptionMap => Task.succeed(descriptionMap.asScala.toMap.apply(topic))
+          }
         )
     }
 
