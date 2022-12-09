@@ -13,7 +13,7 @@ enum Command(commandType: CommandType) {
   case CreateGroup(name: String, topic: String) extends Command(CommandType.CreateGroup)
   case CreateTopic(name: String, partitions: Option[Int], replicas: Option[Int])
       extends Command(CommandType.CreateTopic)
-  case Select(fromTopic: String, last: Long) extends Command(CommandType.Select)
-  case SelectFollow(fromTopic: String) extends Command(CommandType.Select)
+  case Select(fromTopic: String, format: String, last: Long) extends Command(CommandType.Select)
+  case SelectFollow(fromTopic: String, format: String) extends Command(CommandType.Select)
   case Insert(toTopic: String, key: String, value: String) extends Command(CommandType.Insert)
 }

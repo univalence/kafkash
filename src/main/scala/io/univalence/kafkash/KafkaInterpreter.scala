@@ -28,9 +28,9 @@ object KafkaInterpreter {
 
     def deleteGroup(group: String): Task[RunningState]
 
-    def selectFollow(fromTopic: String): Task[RunningState]
+    def selectFollow(fromTopic: String, format: String): Task[RunningState]
 
-    def select(fromTopic: String, last: Long): Task[RunningState]
+    def select(fromTopic: String, format: String, last: Long): Task[RunningState]
 
     def insert(toTopic: String, key: String, value: String): Task[RunningState]
   }

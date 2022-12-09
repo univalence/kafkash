@@ -45,4 +45,16 @@ class CommandParserTest extends AnyFunSuiteLike {
     assert(result == scala.util.Success(Command.Insert("topic", "abc''31", """{"msg": "hello"}""")))
   }
 
+  test("should parse command select follow") {
+    val result = parser.parseCommand("""SELECT string FROM topic FOLLOW""")
+
+    assert(result == scala.util.Success(Command.SelectFollow("topic", "STRING")))
+  }
+
+  test("should parse command select last") {
+    val result = parser.parseCommand("""SELECT hex FROM topic LAST 2""")
+
+    assert(result == scala.util.Success(Command.Select("topic", "HEX", 2L)))
+  }
+
 }

@@ -166,9 +166,9 @@ object KafkaShApp extends ZIOAppDefault {
       case Command.DeleteGroup(group)        => Interpreter(_.deleteGroup(group))
       case Command.CreateGroup(group, topic) => Interpreter(_.createGroup(group, topic))
       case Command.CreateTopic(topic, partitions, replicats) =>
-        Interpreter(_.createTopic(topic, partitions.getOrElse(defaultPartitionCount), None))
-      case Command.Select(fromTopic, last)     => Interpreter(_.select(fromTopic, last))
-      case Command.SelectFollow(fromTopic)     => Interpreter(_.selectFollow(fromTopic))
+        Interpreter(_.createTopic(topic, partitions.getOrElse(defaultPartitionCount), replicats))
+      case Command.Select(fromTopic, format, last)     => Interpreter(_.select(fromTopic, format, last))
+      case Command.SelectFollow(fromTopic, format)     => Interpreter(_.selectFollow(fromTopic, format))
       case Command.Insert(toTopic, key, value) => Interpreter(_.insert(toTopic, key, value))
     }
 

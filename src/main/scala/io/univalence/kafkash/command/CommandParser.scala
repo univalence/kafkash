@@ -99,14 +99,16 @@ object CommandParser extends RegexParsers {
     )
 
   def select: Parser[Command] =
-    keyword("SELECT") ~> s ~> keyword("FROM") ~> s ~> commit(
-      (parseName ~ (s ~> keyword("LAST") ~> (s ~> parseInt).?)) ^^ { case topic ~ delta =>
-        Command.Select(topic, delta.getOrElse(1).toLong)
+    keyword("SELECT") ~> s ~> commit {
+      (parseName ~ (s ~> keyword("FROM") ~> s ~> parseName ~ (s ~> keyword("LAST") ~> (s ~> parseInt).?))) ^^ {
+        case format ~ (topic ~ last) =>
+          Command.Select(topic, format.toUpperCase(), last.getOrElse(1).toLong)
       }
-        | (parseName ~ (s ~> keyword("FOLLOW"))) ^^ { case topic ~ _ =>
-          Command.SelectFollow(topic)
+        | (parseName ~ (s ~> keyword("FROM") ~> s ~> parseName ~ (s ~> keyword("FOLLOW")))) ^^ {
+          case format ~ (topic ~ _) =>
+            Command.SelectFollow(topic, format.toUpperCase())
         }
-    )
+    }
 
   def insert: Parser[Command] =
     keyword("INSERT") ~> s ~> keyword("INTO") ~> s ~> commit(
