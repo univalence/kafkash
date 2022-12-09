@@ -1,5 +1,7 @@
 package io.univalence.kafkash.command
 
+import io.univalence.kafkash.KafkaShApp
+
 enum CommandType(val commandName: String, val usage: String, val description: String) {
   case Quit
       extends CommandType(
@@ -53,7 +55,7 @@ enum CommandType(val commandName: String, val usage: String, val description: St
       extends CommandType(
         commandName = "CREATE TOPIC",
         usage       = "CREATE TOPIC <topic> [PARTITIONS: <int>] [REPLICAS: <int>]",
-        description = "Create a topic (default: partitions=3, replicas=number of cluster nodes)."
+        description = s"Create a topic (default: partitions=${KafkaShApp.defaultPartitionCount}, replicas=number of cluster nodes)."
       )
   case DeleteTopic
       extends CommandType(
@@ -70,8 +72,8 @@ enum CommandType(val commandName: String, val usage: String, val description: St
   case Select
       extends CommandType(
         commandName = "SELECT",
-        usage       = "SELECT FROM <topic> (LAST [<n>] | FOLLOW)",
-        description = "Read data from topic. FOLLOW parameter follows new messages until you hit <Ctrl+C>."
+        usage       = "SELECT <format> FROM <topic> (LAST [<n>] | FOLLOW)",
+        description = "Read data from topic. You have to specify the format (STRING or HEX). FOLLOW parameter follows new messages until you hit <Ctrl+C>."
       )
   case Insert
       extends CommandType(

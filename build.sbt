@@ -21,6 +21,8 @@ lazy val root =
         "org.testcontainers"      % "testcontainers"           % libVersion.testcontainers % Test,
         "org.testcontainers"      % "kafka"                    % libVersion.testcontainers % Test,
         "dev.zio"                %% "zio-test"                 % libVersion.zio            % Test,
+        "dev.zio"                %% "zio-test-sbt"             % libVersion.zio            % Test,
+        "dev.zio"                %% "zio-test-magnolia"        % libVersion.zio            % Test,
         "org.scalatest"          %% "scalatest"                % "3.2.11"                  % Test
       ),
       assemblyPrependShellScript := Some(defaultUniversalScript(shebang = false)),
