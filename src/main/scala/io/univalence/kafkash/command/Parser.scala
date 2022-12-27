@@ -82,7 +82,7 @@ object Parser {
     (
       (input.hasNext && input.current != delimiter)
         || (input.hasNext && input.current == delimiter && input.next.hasNext && input.next.current == delimiter)
-      )
+    )
 
   def string(delimiter: Char): StringParser[String] = { (input: StringInput) =>
     if (!input.hasNext) ParseResult.Failure("String expected", input)

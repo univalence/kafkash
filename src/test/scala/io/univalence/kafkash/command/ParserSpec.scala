@@ -38,25 +38,23 @@ object ParserSpec extends ZIOSpecDefault {
       suite("String parser")(
         test("continue") {
           (assertTrue(Parser.shouldContinue(Input("h"), '\''))
-            && assertTrue(Parser.shouldContinue(Input("''"), '\''))
-            && assertTrue(!Parser.shouldContinue(Input("'"), '\''))
-            && assertTrue(!Parser.shouldContinue(Input("' "), '\''))
-            )
+          && assertTrue(Parser.shouldContinue(Input("''"), '\''))
+          && assertTrue(!Parser.shouldContinue(Input("'"), '\''))
+          && assertTrue(!Parser.shouldContinue(Input("' "), '\'')))
         },
         test("should parse string with delimiters") {
-          val result = (Parser.string('\'').parse(Input("'hello'")))
+          val result = Parser.string('\'').parse(Input("'hello'"))
           assertTrue(result == ParseResult.Success("hello", Input("'hello'", 7)))
         },
         test("should parse string with delimiters and escape delimiter") {
-          val result = (Parser.string('\'').parse(Input("'hello''s'")))
+          val result = Parser.string('\'').parse(Input("'hello''s'"))
           assertTrue(result == ParseResult.Success("hello's", Input("'hello''s'", 10)))
-        },
-
+        }
       )
     )
 
   def readWord: StringParser[String] = { (input: StringInput) =>
-    var i = input
+    var i   = input
     var cmd = ""
     while (i.hasNext && i.current.isLetter) {
       cmd += i.current

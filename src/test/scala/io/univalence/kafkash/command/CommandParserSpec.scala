@@ -69,37 +69,37 @@ object CommandParserSpec extends ZIOSpecDefault {
       suite("Create")(
         test("should parse simple create topic command") {
           val command = "create topic topic"
-          val result = CommandParser.parse(command)
+          val result  = CommandParser.parse(command)
 
           assertTrue(result == Right(Command.CreateTopic("topic", None, None)))
         },
         test("should parse create topic with partitions command") {
           val command = "create topic topic partitions: 4"
-          val result = CommandParser.parse(command)
+          val result  = CommandParser.parse(command)
 
           assertTrue(result == Right(Command.CreateTopic("topic", Some(4), None)))
         },
         test("should parse create topic with replicas command") {
           val command = "create topic topic replicas: 3"
-          val result = CommandParser.parse(command)
+          val result  = CommandParser.parse(command)
 
           assertTrue(result == Right(Command.CreateTopic("topic", None, Some(3))))
         },
         test("should parse create topic with partitions and replicas command") {
           val command = "create topic topic partitions: 4 replicas: 3"
-          val result = CommandParser.parse(command)
+          val result  = CommandParser.parse(command)
 
           assertTrue(result == Right(Command.CreateTopic("topic", Some(4), Some(3))))
         },
         test("should parse create topic with replicas and partitions command") {
           val command = "create topic topic replicas: 3 partitions: 4"
-          val result = CommandParser.parse(command)
+          val result  = CommandParser.parse(command)
 
           assertTrue(result == Right(Command.CreateTopic("topic", Some(4), Some(3))))
         },
         test("should parse create group command") {
           val command = "create group group for topic"
-          val result = CommandParser.parse(command)
+          val result  = CommandParser.parse(command)
 
           assertTrue(result == Right(Command.CreateGroup("group", "topic")))
         }

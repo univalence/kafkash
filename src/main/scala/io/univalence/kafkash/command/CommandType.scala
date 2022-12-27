@@ -55,7 +55,8 @@ enum CommandType(val commandName: String, val usage: String, val description: St
       extends CommandType(
         commandName = "CREATE TOPIC",
         usage       = "CREATE TOPIC <topic> [PARTITIONS: <int>] [REPLICAS: <int>]",
-        description = s"Create a topic (default: partitions=${KafkaShApp.defaultPartitionCount}, replicas=number of cluster nodes)."
+        description =
+          s"Create a topic (default: partitions=${KafkaShApp.defaultPartitionCount}, replicas=number of cluster nodes)."
       )
   case DeleteTopic
       extends CommandType(
@@ -73,7 +74,8 @@ enum CommandType(val commandName: String, val usage: String, val description: St
       extends CommandType(
         commandName = "SELECT",
         usage       = "SELECT <format> FROM <topic> (LAST [<n>] | FOLLOW)",
-        description = "Read data from topic. You have to specify the format (STRING or HEX). FOLLOW parameter follows new messages until you hit <Ctrl+C>."
+        description =
+          "Read data from topic. You have to specify the format (STRING or HEX). FOLLOW parameter follows new messages until you hit <Ctrl+C>."
       )
   case Insert
       extends CommandType(

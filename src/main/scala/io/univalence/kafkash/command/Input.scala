@@ -6,8 +6,10 @@ package io.univalence.kafkash.command
  * This type is generified. So, it can be used with Strings, but also
  * with any kind of sequences.
  *
- * @param data sequence to iterate on
- * @param offset offset in the sequence
+ * @param data
+ *   sequence to iterate on
+ * @param offset
+ *   offset in the sequence
  */
 case class Input[A](data: Seq[A], offset: Int = 0) {
   def hasNext: Boolean = offset < data.length

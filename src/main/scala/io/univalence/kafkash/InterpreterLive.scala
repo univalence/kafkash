@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets
 
 case class InterpreterLive(connection: Connection, console: Console) extends Interpreter {
   import InterpreterLive.*
+
   import scala.jdk.CollectionConverters.*
 
   override def showTopic(topic: String): Task[RunningState] =
@@ -255,7 +256,7 @@ case class InterpreterLive(connection: Connection, console: Console) extends Int
 
 }
 object InterpreterLive {
-  
+
   def toStringEscape(bytes: Array[Byte]): String =
     new String(bytes, StandardCharsets.UTF_8).map { c =>
       if (isPrintable(c)) c else '.'
@@ -283,9 +284,9 @@ object InterpreterLive {
     val block = Character.UnicodeBlock.of(c)
 
     (!Character.isISOControl(c))
-      && (c != KeyEvent.CHAR_UNDEFINED)
-      && (block != null)
-      && (block != Character.UnicodeBlock.SPECIALS)
+    && (c != KeyEvent.CHAR_UNDEFINED)
+    && (block != null)
+    && (block != Character.UnicodeBlock.SPECIALS)
   }
-  
+
 }

@@ -74,15 +74,13 @@ class ZAdminClient(admin: AdminClient) extends ZWrapped(admin) {
       ZIO
         .fromFutureJava(admin.describeTopics(List(topic).asJava).all())
         .map(descriptionMap => descriptionMap.asScala.toMap.apply(topic))
-        .tapError(
-          {
-            // FIXME transmit cause in ZIO failure
-            case e: org.apache.kafka.common.errors.UnknownTopicOrPartitionException =>
-              Task.fail(new NoSuchElementException(topic))
-            case e =>
-              Task.fail(e)
-          }
-        )
+        .tapError {
+          // FIXME transmit cause in ZIO failure
+          case e: org.apache.kafka.common.errors.UnknownTopicOrPartitionException =>
+            Task.fail(new NoSuchElementException(topic))
+          case e =>
+            Task.fail(e)
+        }
     }
 
   def describeGroup(group: String): Task[ConsumerGroupDescription] =
