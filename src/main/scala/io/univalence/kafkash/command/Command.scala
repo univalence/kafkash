@@ -1,6 +1,6 @@
 package io.univalence.kafkash.command
 
-enum Command(commandType: CommandType) {
+enum Command(val commandType: CommandType) {
   case Quit extends Command(CommandType.Quit)
   case Help(command: Option[CommandType]) extends Command(CommandType.Help)
   case ShowTopic(topic: String) extends Command(CommandType.ShowTopic)

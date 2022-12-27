@@ -11,7 +11,6 @@ lazy val root =
       libraryDependencies ++= Seq(
         "dev.zio"                %% "zio"                      % libVersion.zio,
         "dev.zio"                %% "zio-streams"              % libVersion.zio,
-        "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1",
         "org.apache.kafka"        % "kafka-clients"            % "2.8.1",
         "ch.qos.logback"          % "logback-core"             % libVersion.logback,
         "ch.qos.logback"          % "logback-classic"          % libVersion.logback,

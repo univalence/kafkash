@@ -122,7 +122,7 @@ object KafkaShApp extends ZIOAppDefault {
       .unit
 
   def readCommand(prompt: String): ZIO[Console, CommandIssue, Command] =
-    Console(_.read(">"))
+    Console(_.read(prompt))
       .foldZIO(
         {
           case e: EndOfFileException =>
@@ -137,12 +137,9 @@ object KafkaShApp extends ZIOAppDefault {
           if (line.isEmpty)
             ZIO.fail(CommandIssue.Empty)
           else
-            CommandParser.parseCommand(line) match {
-              case Success(cmd)                       => ZIO.succeed(cmd)
-              case Failure(e: NoSuchElementException) => ZIO.fail(CommandIssue.SyntaxError(e.getMessage))
-              case Failure(e) =>
-                e.printStackTrace()
-                ZIO.fail(CommandIssue.GenericError(e))
+            CommandParser.parse(line) match {
+              case Right(cmd) => ZIO.succeed(cmd)
+              case Left(e)    => ZIO.fail(CommandIssue.SyntaxError(e))
             }
       )
 
@@ -165,11 +162,11 @@ object KafkaShApp extends ZIOAppDefault {
       case Command.DeleteTopic(topic)        => Interpreter(_.deleteTopic(topic))
       case Command.DeleteGroup(group)        => Interpreter(_.deleteGroup(group))
       case Command.CreateGroup(group, topic) => Interpreter(_.createGroup(group, topic))
-      case Command.CreateTopic(topic, partitions, replicats) =>
-        Interpreter(_.createTopic(topic, partitions.getOrElse(defaultPartitionCount), replicats))
-      case Command.Select(fromTopic, format, last)     => Interpreter(_.select(fromTopic, format, last))
-      case Command.SelectFollow(fromTopic, format)     => Interpreter(_.selectFollow(fromTopic, format))
-      case Command.Insert(toTopic, key, value) => Interpreter(_.insert(toTopic, key, value))
+      case Command.CreateTopic(topic, partitions, replicas) =>
+        Interpreter(_.createTopic(topic, partitions.getOrElse(defaultPartitionCount), replicas))
+      case Command.Select(fromTopic, format, last) => Interpreter(_.select(fromTopic, format, last))
+      case Command.SelectFollow(fromTopic, format) => Interpreter(_.selectFollow(fromTopic, format))
+      case Command.Insert(toTopic, key, value)     => Interpreter(_.insert(toTopic, key, value))
     }
 
   lazy val displayHelp: RIO[Console, Unit] = {
