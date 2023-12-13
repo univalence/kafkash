@@ -73,14 +73,16 @@ enum CommandType(val commandName: String, val usage: String, val description: St
   case Select
       extends CommandType(
         commandName = "SELECT",
-        usage       = "SELECT <format> FROM <topic> (LAST [<n>] | FOLLOW)",
+        usage       = "SELECT <format> FROM <topic> (LAST [<n>] | FOLLOWS)",
         description =
-          "Read data from topic. You have to specify the format (STRING or HEX). FOLLOW parameter follows new messages until you hit <Ctrl+C>."
+          """Read data from topic. You have to specify the format (STRING or HEX). FOLLOWS parameter follows new messages until you hit <Ctrl+C>.
+Example: SELECT STRING FROM my-topic LAST 10"""
       )
   case Insert
       extends CommandType(
         commandName = "INSERT",
         usage       = "INSERT INTO <topic> KEY <key> VALUE <value>",
-        description = "Push data into topic."
+        description = """Push data into topic.
+Example: INSERT INTO my-topic KEY '123' VALUE 'abc'"""
       )
 }

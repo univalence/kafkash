@@ -64,6 +64,18 @@ object CommandParser {
     }
   }
 
+  val int: LexemParser[Int] = { (input: LexemInput) =>
+    if (input.hasNext) {
+      input.current.asIntValue
+        .map(pname => ParseResult.Success(pname.value, input.next))
+        .getOrElse(
+          ParseResult.Failure(s"expected int - bad parameter: ${input.current}", input)
+        )
+    } else {
+      ParseResult.Failure(s"expected int - end of input", input)
+    }
+  }
+
   val identifier: LexemParser[String] = { (input: LexemInput) =>
     if (input.hasNext) {
       input.current.asParameterIdentifier
@@ -157,9 +169,10 @@ object CommandParser {
         part <- firstPart
         format = part._1
         topic  = part._2
-        count <-
-          namedValue("LAST")
-            .failMap((_, _) => "expected FOLLOWS or LAST: n at the end of SELECT command")
+        _ <-
+          oneWordOf("LAST")
+            .failMap((_, _) => "expected FOLLOWS or LAST n at the end of SELECT command")
+        count <- int
       } yield Command.Select(topic, format, count)
     )
   }

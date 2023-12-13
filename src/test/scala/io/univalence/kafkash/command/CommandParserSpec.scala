@@ -40,13 +40,13 @@ object CommandParserSpec extends ZIOSpecDefault {
           assertTrue(result == Right(Command.SelectFollow("topic", "HEX")))
         },
         test("should parse select last command") {
-          val command = "select string from topic last: 5"
+          val command = "select string from topic last 5"
           val result  = CommandParser.parse(command)
 
           assertTrue(result == Right(Command.Select("topic", "STRING", 5)))
         },
         test("should not parse select command with unknown format") {
-          val command = "select whatever from topic last: 5"
+          val command = "select whatever from topic last 5"
           val result  = CommandParser.parse(command)
 
           assertTrue(result == Left("Error: expected format: STRING, HEX - format unknown: whatever"))
@@ -55,7 +55,7 @@ object CommandParserSpec extends ZIOSpecDefault {
           val command = "select string from topic"
           val result  = CommandParser.parse(command)
 
-          assertTrue(result == Left("Error: expected FOLLOWS or LAST: n at the end of SELECT command"))
+          assertTrue(result == Left("Error: expected FOLLOWS or LAST n at the end of SELECT command"))
         }
       ),
       suite("Insert")(

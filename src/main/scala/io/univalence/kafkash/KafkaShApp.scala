@@ -55,7 +55,7 @@ object KafkaShApp extends ZIOAppDefault {
         _ <- repLoop.orDie
       } yield ()
 
-    val ConsoleLayer = ZLayer.make[Console](zio.Console.live, terminalLayer(applicationName), KafkaShConsole.layer)
+    val ConsoleLayer: ZLayer[Any, Throwable, Console] = ZLayer.make[Console](zio.Console.live, terminalLayer(applicationName), KafkaShConsole.layer)
 
     for {
       args <- getArgs.flatMap(a => ZIO.fromTry(parseArgs(a)))
